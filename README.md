@@ -1,23 +1,14 @@
-unpack_plist_png
-================
+en error occured when parsing my plist file with the original source file:
 
-Let the large png file decompose into tiny png file with the use of plist and png files.
+```
+Traceback (most recent call last):
+  File "unpack_plist.py", line 90, in <module>
+    gen_png_from_plist( plist_filename, png_filename )
+  File "unpack_plist.py", line 73, in gen_png_from_plist
+    result_image.paste(rect_on_big, result_box, mask=0)
+  File "/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/PIL/Image.py", line 1337, in paste
+    self.im.paste(im, box)
+ValueError: images do not match
+```
 
-##Configuration:
-  The script "unpack_plist.py" only work in windows environment. Before using it, you should :
-  
-  1.install python2.7
-  
-  2.install Python Extension Packages Pillow‑2.6.1.win32‑py2.7.exe or Pillow‑2.6.1.win‑amd64‑py2.7.exe.
-  
-  here is download url: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pil
-
-##Usage:
-  Put "unpack_plist.py" script file in the same directory with plist and png files.
-  use the command:
-  >python unpack_plist.py plistname
-  
-  then the folder name "plistname" will be made and it includes tiny png files you want.
-
-##Example
-  if the current directory has files "unpack_plist.py" "MessageImage.plist" and "MessageImage.png", the only work you should do is typing the follow command: python unpack_plist.py MessageImage. Then the tiny png files are made.
+So I changed some source code

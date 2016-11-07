@@ -28,19 +28,27 @@ def gen_png_from_plist(plist_filename, png_filename):
             rectlist = to_list(v['textureRect'])
         elif v.has_key('frame'):
             rectlist = to_list(v['frame'])
+
         if v.has_key('rotated'):
             width = int( rectlist[3] if v['rotated'] else rectlist[2] )
-            height = int( rectlist[2] if v['rotated'] else rectlist[3] )        
+            height = int( rectlist[2] if v['rotated'] else rectlist[3] )
         else:
             width = int( rectlist[2] )
             height = int( rectlist[3] )
-        box=( 
+
+        box=(
             int(rectlist[0]),
             int(rectlist[1]),
             int(rectlist[0]) + width,
             int(rectlist[1]) + height,
             )
-        #print box
+#        print box
+        rect_on_big = big_image.crop(box)
+        if (v.has_key('textureRotated') and v['textureRotated']) or (v.has_key('rotated') and v['rotated']):
+#            print ("before rotate: ", rect_on_big.size)
+            rect_new = rect_on_big.rotate(90)
+            rect_on_big = rect_on_big.rotate(90,  expand=True)
+#            print ("after rotate: ", rect_new.size, rect_on_big.size)
         #print v
         if v.has_key('spriteSize'):
             spriteSize = v['spriteSize']
@@ -48,28 +56,37 @@ def gen_png_from_plist(plist_filename, png_filename):
             spriteSize = v['sourceSize']
             
         sizelist = [ int(x) for x in to_list(spriteSize)]
-        #print sizelist
-        rect_on_big = big_image.crop(box)
 
-        if (v.has_key('textureRotated') and v['textureRotated']) or (v.has_key('rotated') and v['rotated']):
-            rect_on_big = rect_on_big.rotate(90)
+#        print ("width=", width,"height:", height, "cropimagesize:", rect_on_big.size)
+#        print ("new iamgesize: ", sizelist)
+
+#        if (v.has_key('textureRotated') and v['textureRotated']) or (v.has_key('rotated') and v['rotated']):
+#            result_box=(
+#                ( sizelist[0] - height )/2,
+#                ( sizelist[1] - width )/2,
+#                ( sizelist[0] + height )/2,
+#                ( sizelist[1] + width )/2
+#                )
+#        else:
+#            result_box=(
+#                ( sizelist[0] - width )/2,
+#                ( sizelist[1] - height )/2,
+#                ( sizelist[0] + width )/2,
+#                ( sizelist[1] + height )/2
+#                )
+
+##decide the position in original image
+        if v.has_key('spriteRectSize'):
+            sourceColorRect = v['spriteRectSize']
+        elif v.has_key('sourceColorRect'):
+            sourceColorRect = v['sourceColorRect']
+        result_box = [ int(x) for x in to_list(sourceColorRect)]
+        result_box[2] += result_box[0];
+        result_box[3] += result_box[1];
+    
+#        print result_box
 
         result_image = Image.new('RGBA', sizelist, (0,0,0,0))
-        
-        if (v.has_key('textureRotated') and v['textureRotated']) or (v.has_key('rotated') and v['rotated']):
-            result_box=(
-                ( sizelist[0] - height )/2,
-                ( sizelist[1] - width )/2,
-                ( sizelist[0] + height )/2,
-                ( sizelist[1] + width )/2
-                )
-        else:
-            result_box=(
-                ( sizelist[0] - width )/2,
-                ( sizelist[1] - height )/2,
-                ( sizelist[0] + width )/2,
-                ( sizelist[1] + height )/2
-                )
         result_image.paste(rect_on_big, result_box, mask=0)
 
         if not os.path.isdir(file_path):
@@ -79,7 +96,8 @@ def gen_png_from_plist(plist_filename, png_filename):
         #print k
         if outfile.find('.png') == -1:
             outfile = outfile + '.png'
-        print outfile, "generated"
+#        print outfile, "generated"
+        #rect_on_big.save(outfile)
         result_image.save(outfile)
 
 if __name__ == '__main__':
@@ -88,5 +106,6 @@ if __name__ == '__main__':
     png_filename = filename + '.png'
     if (os.path.exists(plist_filename) and os.path.exists(png_filename)):
         gen_png_from_plist( plist_filename, png_filename )
+        print "finished!"
     else:
         print "make sure you have both plist and png files in the same directory"
